@@ -1,6 +1,6 @@
 # RadonReader
 
-This project provides a tool which allows users collect currect radon data from FTLab Radon Eye RD200 (Bluetooth only version).
+This project provides a tool which allows users collect current radon data from FTLab Radon Eye RD200 (Bluetooth only version).
 
 # Limitations
 
