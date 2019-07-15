@@ -21,7 +21,7 @@ For now you must configure the file directly.
   - <b>RadonEyeBTAddress</b> = "xx:xx:xx:xx:xx:xx"
     - Your RadonEye RD200 Bluetooth Address
   - <b>picoCurie</b> = <i>True</i> or <i>False</i>
-    - Shows Radon Level on pCi/L unit if True, or Bq/m^3 unit if False
+    - Shows Radon Level on pCi/L unit if <b>True</b>, or Bq/m^3 unit if <b>False</b>
   - <b>Verbose</b> = <i>True</i> or <i>False</i>
     - Verbose mode (on / off)
   - <b>OnlyValue</b> = <i>True</i> or <i>False</i>
