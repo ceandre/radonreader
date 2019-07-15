@@ -25,6 +25,6 @@ For now you must configure the file directly.
   - <b>Verbose</b> = <i>True</i> or <i>False</i>
     - Verbose mode (on / off)
   - <b>OnlyValue</b> = <i>True</i> or <i>False</i>
-    - Show only radon value without unit information
+    - Show only radon value without timestamp and unit information
     
     
