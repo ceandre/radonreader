@@ -4,7 +4,6 @@
 #
 # Author: Carlos Andre
 #
- 
 import struct
 import time
 
