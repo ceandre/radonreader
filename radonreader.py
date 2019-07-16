@@ -24,7 +24,6 @@ Verbose = False
 OnlyValue = False
 
 def GetRadonValue():
-
     if Verbose: 
         print ("Connecting...")
     DevBT = btle.Peripheral(RadonEyeBTAddress, "random")
