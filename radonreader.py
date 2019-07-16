@@ -5,7 +5,6 @@
 # Author: Carlos Andre
 #
  
-import binascii
 import struct
 import time
 
