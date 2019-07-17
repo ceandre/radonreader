@@ -11,15 +11,15 @@ This project provides a tool which allows users collect current radon data from 
 - Python 2.7.x 
 - bluepy Python library
 
-# Using
+# Usage
+<pre><code>
+radon_reader.py [-h] -a ADDRESS [-b] [-v] [-s]
 
-- Open radonreader.py and configure it directly. 
-  - <b>RadonEyeBTAddress</b> = "xx:xx:xx:xx:xx:xx"
-    - Your RadonEye RD200 Bluetooth Address
-  - <b>picoCurie</b> = <i>True</i> or <i>False</i>
-    - Shows Radon Level on pCi/L unit if <b>True</b>, or Bq/m^3 unit if <b>False</b>
-  - <b>Verbose</b> = <i>True</i> or <i>False</i>
-    - Verbose mode (on / off)
-  - <b>OnlyValue</b> = <i>True</i> or <i>False</i>
-    - Show only radon value without timestamp and unit information
-    
+optional arguments:
+  -h, --help            show this help message and exit
+  -a ADDRESS, --address ADDRESS
+                        Bluetooth Address (AA:BB:CC:DD:EE:FF format)
+  -b, --becquerel       Display radon value in Becquerel (Bq/m^3) unit
+  -v, --verbose         Verbose mode
+  -s, --silent          Only output radon value (without unit and timestamp)
+ </code></pre>
