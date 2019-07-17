@@ -2,10 +2,6 @@
 
 This project provides a tool which allows users collect current radon data from FTLab Radon Eye RD200 (Bluetooth only version).
 
-# Limitations
-
-For now you must configure the file directly.
-
 # Hardware Requeriments
 - FTLabs RadonEye RD200 
 - Raspberry Pi 
