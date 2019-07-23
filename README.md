@@ -12,8 +12,7 @@ This project provides a tool which allows users collect current radon data from 
 - bluepy Python library
 
 # Usage
-<pre><code>
-radon_reader.py [-h] -a ADDRESS [-b] [-v] [-s]
+<pre><code>radon_reader.py [-h] -a ADDRESS [-b] [-v] [-s]
 
 optional arguments:
   -h, --help            show this help message and exit
