@@ -11,6 +11,9 @@ This project provides a tool which allows users collect current radon data from 
 - Python 2.7.x 
 - bluepy Python library
 
+# History
+- 0.3 - Added MQTT support
+
 # Usage
 <pre><code>usage: radon_reader.py [-h] -a ADDRESS [-b] [-v] [-s] [-m] [-ms MQTT_SRV]
                        [-mp MQTT_PORT] [-mu MQTT_USER] [-mw MQTT_PW] [-ma]
