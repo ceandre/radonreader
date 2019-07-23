@@ -3,7 +3,7 @@
 """ radon_reader.py: RadonEye RD200 (Bluetooth/BLE) Reader """
 
 __progname__    = "RadonEye RD200 (Bluetooth/BLE) Reader"
-__version__     = "0.3"
+__version__     = "0.3b"
 __author__      = "Carlos Andre"
 __email__       = "candrecn at hotmail dot com"
 __date__        = "2019-07-23"
@@ -33,6 +33,7 @@ if not re.match("^([0-9A-F]{2}:){5}[0-9A-F]{2}$", args.address) or (args.mqtt an
     parser.print_help()
     quit()
 
+
 def GetRadonValue():
     if args.verbose and not args.silent:
         print ("Connecting...")
@@ -56,6 +57,11 @@ def GetRadonValue():
     RadonValue = struct.unpack('<f',RadonValue[2:6])[0]
    
     DevBT.disconnect()
+
+    if RadonValue > 1000:
+        # Raise exception (will try get Radon value from RadonEye again) if detected a very high Randon value. 
+        # Maybe a bug on RD200 or Python BLE Lib?!
+        raise Exception("Strangely high number. Debug needed.")
 
     if args.becquerel:
         Unit="Bq/m^3"
@@ -93,10 +99,11 @@ def GetRadonValue():
 
         if args.mqtt_ha:
             ha_var = json.dumps({"radonvalue": "%0.2f" % (RadonValue)})
-            client.publish("enviroment/RADONEYE/"+REkey,ha_var,qos=1)
+            client.publish("environment/RADONEYE/"+REkey,ha_var,qos=1)
         else:
             client.publish("emon/RADONEYE/"+REkey,RadonValue,qos=1)
 
+        sleep(1)
         client.disconnect()
 
 try:
