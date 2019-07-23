@@ -2,17 +2,21 @@
 
 This project provides a tool which allows users collect current radon data from FTLab Radon Eye RD200 (Bluetooth only version).
 
+
 # Hardware Requeriments
 - FTLabs RadonEye RD200 
 - Raspberry Pi 
 - Bluetooth with BLE (Low Energy) support
 
+
 # Software Requeriments
 - Python 2.7.x 
 - bluepy Python library
 
+
 # History
 - 0.3 - Added MQTT support
+
 
 # Usage
 <pre><code>usage: radon_reader.py [-h] -a ADDRESS [-b] [-v] [-s] [-m] [-ms MQTT_SRV]
