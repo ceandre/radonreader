@@ -13,7 +13,7 @@ import paho.mqtt.client as mqtt
 
 from bluepy import btle
 from time import sleep
-from random import radint
+from random import randint
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=__progname__)
 parser.add_argument('-a','--address',help='Bluetooth Address (AA:BB:CC:DD:EE:FF format)',required=True)
