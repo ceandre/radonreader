@@ -3,16 +3,17 @@
 """ radon_reader.py: RadonEye RD200 (Bluetooth/BLE) Reader """
 
 __progname__    = "RadonEye RD200 (Bluetooth/BLE) Reader"
-__version__     = "0.3c"
+__version__     = "0.3d"
 __author__      = "Carlos Andre"
 __email__       = "candrecn at hotmail dot com"
-__date__        = "2019-07-23"
+__date__        = "2019-07-24"
 
 import argparse, struct, time, re, json
 import paho.mqtt.client as mqtt
 
 from bluepy import btle
 from time import sleep
+from random import radint
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=__progname__)
 parser.add_argument('-a','--address',help='Bluetooth Address (AA:BB:CC:DD:EE:FF format)',required=True)
@@ -32,7 +33,6 @@ args.address = args.address.upper()
 if not re.match("^([0-9A-F]{2}:){5}[0-9A-F]{2}$", args.address) or (args.mqtt and (args.mqtt_srv == None or args.mqtt_user == None or args.mqtt_pw == None)):
     parser.print_help()
     quit()
-
 
 def GetRadonValue():
     if args.verbose and not args.silent:
@@ -90,21 +90,22 @@ def GetRadonValue():
                 mqtt_out="EmonCMS"
             print ("MQTT Output...: %s" % mqtt_out)
 
-        # REKey = Last 3 bluetooth address octets (Register/Identify multiple RadonEyes)
+        # REKey = Last 3 bluetooth address octets (Register/Identify multiple RadonEyes).
+        # Sample: D7-21-A0
         REkey = args.address[9:].replace(":","-")
 
-        client = mqtt.Client()
-        client.username_pw_set(args.mqtt_user,args.mqtt_pw)
-        client.connect(args.mqtt_srv, args.mqtt_port)
+        clientMQTT = mqtt.Client("RadonEye_%s" % randint(1000,9999))
+        clientMQTT.username_pw_set(args.mqtt_user,args.mqtt_pw)
+        clientMQTT.connect(args.mqtt_srv, args.mqtt_port)
 
         if args.mqtt_ha:
             ha_var = json.dumps({"radonvalue": "%0.2f" % (RadonValue)})
-            client.publish("environment/RADONEYE/"+REkey,ha_var,qos=1)
+            clientMQTT.publish("environment/RADONEYE/"+REkey,ha_var,qos=1)
         else:
-            client.publish("emon/RADONEYE/"+REkey,RadonValue,qos=1)
+            clientMQTT.publish("emon/RADONEYE/"+REkey,RadonValue,qos=1)
 
         sleep(1)
-        client.disconnect()
+        clientMQTT.disconnect()
 
 try:
     GetRadonValue()
