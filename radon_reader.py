@@ -3,10 +3,10 @@
 """ radon_reader.py: RadonEye RD200 (Bluetooth/BLE) Reader """
 
 __progname__    = "RadonEye RD200 (Bluetooth/BLE) Reader"
-__version__     = "0.3d"
+__version__     = "0.3.5"
 __author__      = "Carlos Andre"
 __email__       = "candrecn at hotmail dot com"
-__date__        = "2019-07-24"
+__date__        = "2019-09-09"
 
 import argparse, struct, time, re, json
 import paho.mqtt.client as mqtt
@@ -22,7 +22,7 @@ parser.add_argument('-v','--verbose',action='store_true',help='Verbose mode', re
 parser.add_argument('-s','--silent',action='store_true',help='Only output radon value (without unit and timestamp)', required=False)
 parser.add_argument('-m','--mqtt',action='store_true',help='Enable send output to MQTT server', required=False)
 parser.add_argument('-ms','--mqtt_srv',help='MQTT server URL or IP address', required=False)
-parser.add_argument('-mp','--mqtt_port',help='MQTT server service port (Default: 1883)', required=False)
+parser.add_argument('-mp','--mqtt_port',help='MQTT server service port (Default: 1883)', required=False, default=1883)
 parser.add_argument('-mu','--mqtt_user',help='MQTT server username', required=False)
 parser.add_argument('-mw','--mqtt_pw',help='MQTT server password', required=False)
 parser.add_argument('-ma','--mqtt_ha',action='store_true',help='Home Assistant MQTT server output (Default: EmonCMS)', required=False)
@@ -58,9 +58,9 @@ def GetRadonValue():
    
     DevBT.disconnect()
 
+    # Raise exception (will try get Radon value from RadonEye again) if received a very high radon value. 
+    # Maybe a bug on RD200 or Python BLE Lib?!
     if RadonValue > 1000:
-        # Raise exception (will try get Radon value from RadonEye again) if received a very high radon value. 
-        # Maybe a bug on RD200 or Python BLE Lib?!
         raise Exception("Strangely high radon value. Debugging needed.")
 
     if args.becquerel:
@@ -75,20 +75,13 @@ def GetRadonValue():
         print ("%s - %s - Radon Value: %0.2f %s" % (time.strftime("%Y-%m-%d [%H:%M:%S]"),args.address,RadonValue,Unit))
    
     if args.mqtt:
-        if args.mqtt_port == None:
-            args.mqtt_port = "1883"
-
         if args.verbose and not args.silent:
             print ("Sending to MQTT...")
-            print ("MQTT Server...: %s" % args.mqtt_srv)
-            print ("MQTT Port.....: %s" % args.mqtt_port)
-            print ("MQTT Username.: %s" % args.mqtt_user)
-            print ("MQTT Password.: %s" % args.mqtt_pw)
             if args.mqtt_ha:
                 mqtt_out="Home Assistant"
             else:
                 mqtt_out="EmonCMS"
-            print ("MQTT Output...: %s" % mqtt_out)
+            print ("MQTT Server: %s | Port: %s | Username: %s | Password: %s | Output: %s" % (args.mqtt_srv, args.mqtt_port, args.mqtt_user, args.mqtt_pw, mqtt_out))
 
         # REKey = Last 3 bluetooth address octets (Register/Identify multiple RadonEyes).
         # Sample: D7-21-A0
@@ -104,12 +97,17 @@ def GetRadonValue():
         else:
             clientMQTT.publish("emon/RADONEYE/"+REkey,RadonValue,qos=1)
 
+        if args.verbose and not args.silent:
+            print ("OK")
         sleep(1)
         clientMQTT.disconnect()
 
 try:
     GetRadonValue()
-except:
+except Exception as e:
+    if args.verbose and not args.silent:
+        print (e)
+    
     for i in range(1,4):
         try:
             if args.verbose and not args.silent:
