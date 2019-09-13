@@ -35,5 +35,4 @@ optional arguments:
   -mp MQTT_PORT    MQTT server service port (Default: 1883)
   -mu MQTT_USER    MQTT server username
   -mw MQTT_PW      MQTT server password
-  -ma              Enable Home Assistant MQTT output (Default: EmonCMS)
- </code></pre>
+  -ma              Enable Home Assistant MQTT output (Default: EmonCMS)</code></pre>
