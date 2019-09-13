@@ -25,20 +25,15 @@ This project provides a tool which allows users collect current radon data from 
 RadonEye RD200 (Bluetooth/BLE) Reader
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -a ADDRESS, --address ADDRESS
-                        Bluetooth Address (AA:BB:CC:DD:EE:FF format)
-  -b, --becquerel       Display radon value in Becquerel (Bq/m^3) unit
-  -v, --verbose         Verbose mode
-  -s, --silent          Only output radon value (without unit and timestamp)
-  -m, --mqtt            Enable send output to MQTT server
-  -ms MQTT_SRV, --mqtt_srv MQTT_SRV
-                        MQTT server URL or IP address
-  -mp MQTT_PORT, --mqtt_port MQTT_PORT
-                        MQTT server service port (Default: 1883)
-  -mu MQTT_USER, --mqtt_user MQTT_USER
-                        MQTT server username
-  -mw MQTT_PW, --mqtt_pw MQTT_PW
-                        MQTT server password
-  -ma, --mqtt_ha        Home Assistant MQTT server output (Default: EmonCMS)
+  -h, --help       show this help message and exit
+  -a ADDRESS       Bluetooth Address (AA:BB:CC:DD:EE:FF format)
+  -b, --becquerel  Display radon value in Becquerel (Bq/m^3) unit
+  -v, --verbose    Verbose mode
+  -s, --silent     Only output radon value (without unit and timestamp)
+  -m, --mqtt       Enable send output to MQTT server
+  -ms MQTT_SRV     MQTT server URL or IP address
+  -mp MQTT_PORT    MQTT server service port (Default: 1883)
+  -mu MQTT_USER    MQTT server username
+  -mw MQTT_PW      MQTT server password
+  -ma              Enable Home Assistant MQTT output (Default: EmonCMS)
  </code></pre>
