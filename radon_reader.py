@@ -6,7 +6,7 @@ __progname__    = "RadonEye RD200 (Bluetooth/BLE) Reader"
 __version__     = "0.3.6"
 __author__      = "Carlos Andre"
 __email__       = "candrecn at hotmail dot com"
-__date__        = "2019-09-09"
+__date__        = "2019-09-13"
 
 import argparse, struct, time, re, json
 import paho.mqtt.client as mqtt
