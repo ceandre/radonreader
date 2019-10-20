@@ -3,10 +3,10 @@
 """ radon_reader.py: RadonEye RD200 (Bluetooth/BLE) Reader """
 
 __progname__    = "RadonEye RD200 (Bluetooth/BLE) Reader"
-__version__     = "0.3.6"
+__version__     = "0.3.8"
 __author__      = "Carlos Andre"
 __email__       = "candrecn at hotmail dot com"
-__date__        = "2019-09-13"
+__date__        = "2019-10-20"
 
 import argparse, struct, time, re, json
 import paho.mqtt.client as mqtt
@@ -19,13 +19,13 @@ parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpForm
 parser.add_argument('-a',dest='address',help='Bluetooth Address (AA:BB:CC:DD:EE:FF format)',required=True)
 parser.add_argument('-b','--becquerel',action='store_true',help='Display radon value in Becquerel (Bq/m^3) unit', required=False)
 parser.add_argument('-v','--verbose',action='store_true',help='Verbose mode', required=False)
-parser.add_argument('-s','--silent',action='store_true',help='Only output radon value (without unit and timestamp)', required=False)
-parser.add_argument('-m','--mqtt',action='store_true',help='Enable send output to MQTT server', required=False)
+parser.add_argument('-s','--silent',action='store_true',help='Output only radon value (without unit and timestamp)', required=False)
+parser.add_argument('-m','--mqtt',action='store_true',help='Also send radon value to a MQTT server', required=False)
 parser.add_argument('-ms',dest='mqtt_srv',help='MQTT server URL or IP address', required=False)
 parser.add_argument('-mp',dest='mqtt_port',help='MQTT server service port (Default: 1883)', required=False, default=1883)
 parser.add_argument('-mu',dest='mqtt_user',help='MQTT server username', required=False)
 parser.add_argument('-mw',dest='mqtt_pw',help='MQTT server password', required=False)
-parser.add_argument('-ma',dest='mqtt_ha',action='store_true',help='Enable Home Assistant MQTT output (Default: EmonCMS)', required=False)
+parser.add_argument('-ma',dest='mqtt_ha',action='store_true',help='Switch to Home Assistant MQTT output (Default: EmonCMS)', required=False)
 args = parser.parse_args()
 
 args.address = args.address.upper()
@@ -58,10 +58,11 @@ def GetRadonValue():
    
     DevBT.disconnect()
 
-    # Raise exception (will try get Radon value from RadonEye again) if received a very high radon value. 
+    # Raise exception (will try get Radon value from RadonEye again) if received a very
+    # high radon value or lower than 0. 
     # Maybe a bug on RD200 or Python BLE Lib?!
-    if RadonValue > 1000:
-        raise Exception("Strangely high radon value. Debugging needed.")
+    if ( RadonValue > 1000 ) or ( RadonValue < 0 ):
+        raise Exception("Very strange radon value. Debugging needed.")
 
     if args.becquerel:
         Unit="Bq/m^3"
@@ -113,9 +114,14 @@ except Exception as e:
         try:
             if args.verbose and not args.silent:
                 print ("Failed, trying again (%s)..." % i)
+
             sleep(5)
             GetRadonValue()
-        except:
+
+        except Exception as e:
+            if args.verbose and not args.silent:
+                print (e)
+
             if i < 3:
                 continue
             else:
