@@ -6,7 +6,7 @@ This project provides a tool which allows users collect current radon data from 
 # Hardware Requeriments
 - FTLabs RadonEye RD200 
 - Raspberry Pi 
-- Bluetooth with BLE (Low Energy) support
+- Bluetooth LE (Low Energy) support
 
 
 # Software Requeriments
