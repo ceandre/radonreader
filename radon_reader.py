@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """ radon_reader.py: RadonEye RD200 (Bluetooth/BLE) Reader """
 
@@ -10,10 +10,19 @@ __date__        = "2019-10-20"
 
 import argparse, struct, time, re, json
 import paho.mqtt.client as mqtt
-
+import logging
+import sys
 from bluepy import btle
 from time import sleep
 from random import randint
+
+logger = logging.getLogger()
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=__progname__)
 parser.add_argument('-a',dest='address',help='Bluetooth Address (AA:BB:CC:DD:EE:FF format)',required=True)
@@ -36,27 +45,49 @@ if not re.match("^([0-9A-F]{2}:){5}[0-9A-F]{2}$", args.address) or (args.mqtt an
 
 def GetRadonValue():
     if args.verbose and not args.silent:
-        print ("Connecting...")
-    DevBT = btle.Peripheral(args.address, "random")
-    RadonEye = btle.UUID("00001523-1212-efde-1523-785feabcd123")
-    RadonEyeService = DevBT.getServiceByUUID(RadonEye)
+       logger.setLevel(logging.DEBUG)
+    else:
+       logger.setLevel(logging.ERROR)
 
-    # Write 0x50 to 00001524-1212-efde-1523-785feabcd123
-    if args.verbose and not args.silent:
-        print ("Writing...")
-    uuidWrite  = btle.UUID("00001524-1212-efde-1523-785feabcd123")
-    RadonEyeWrite = RadonEyeService.getCharacteristics(uuidWrite)[0]
-    RadonEyeWrite.write(bytes("\x50"))
+    try:
+       DevBT = btle.Peripheral()
+       DevBT.connect(args.address, 'public')
+       services = DevBT.getServices()
+       for service in list(services):
+          logger.debug(service)
 
-    # Read from 3rd to 6th byte of 00001525-1212-efde-1523-785feabcd123
-    if args.verbose and not args.silent:
-        print ("Reading...")
-    uuidRead  = btle.UUID("00001525-1212-efde-1523-785feabcd123")
-    RadonEyeValue = RadonEyeService.getCharacteristics(uuidRead)[0]
-    RadonValue = RadonEyeValue.read()
-    RadonValue = struct.unpack('<f',RadonValue[2:6])[0]
-   
-    DevBT.disconnect()
+       RadonEye = btle.UUID("00001523-0000-1000-8000-00805f9b34fb")
+       RadonEyeService = DevBT.getServiceByUUID(RadonEye)
+       logger.debug('Reading: {}'.format(RadonEye))
+       logger.debug('RadonEyeService from UUID: {}'.format(RadonEyeService))
+
+       # Write 0x50 to 00001524-1212-efde-1523-785feabcd123
+       uuidWrite  = btle.UUID("00001524-0000-1000-8000-00805f9b34fb")
+       logger.debug('Writing UUID: {}'.format(uuidWrite))
+       RadonEyeWrite = RadonEyeService.getCharacteristics(uuidWrite)[0]
+       logger.debug('Service Characteristics: {}'.format(RadonEyeWrite))
+       bGETValues = bytes("\x50", "ascii")
+       logger.debug('Writing Bytes: {}'.format(bGETValues))
+       RadonEyeWrite.write(bGETValues,True)
+       #RadonEyeWrite.write(bytes("P",'ascii'),True)
+       while DevBT.waitForNotifications(1): pass
+     #   while self.delegate.data_length < min_bytes: pass
+      #  received = self.delegate.data
+      #  if unpack_string: received = struct.unpack(unpack_string,received)
+       # Read from 3rd to 6th byte of 00001525-1212-efde-1523-785feabcd123
+       uuidRead  = btle.UUID("00001525-0000-1000-8000-00805f9b34fb")
+       logger.debug('Reading: {}'.format(uuidRead))
+       RadonEyeValue = RadonEyeService.getCharacteristics(uuidRead)[0]
+       RadonValue = RadonEyeValue.read()
+       logger.debug('Radon Value: {}'.format(RadonValue))
+       RadonValue = struct.unpack('<H',RadonValue[2:4])[0]
+
+       DevBT.disconnect()
+
+    except btle.BTLEException as e:
+          logger.error('BluePy failed: {}'.format(e))
+          return False
+
 
     # Raise exception (will try get Radon value from RadonEye again) if received a very
     # high radon value or lower than 0. 
@@ -66,10 +97,11 @@ def GetRadonValue():
 
     if args.becquerel:
         Unit="Bq/m^3"
-        RadonValue = ( RadonValue * 37 )
+#        RadonValue = ( RadonValue * 37 )
     else:
         Unit="pCi/L"
- 
+        RadonValue = ( RadonValue / 37 )
+
     if args.silent:
         print ("%0.2f" % (RadonValue))
     else: 
@@ -112,9 +144,7 @@ except Exception as e:
     
     for i in range(1,4):
         try:
-            if args.verbose and not args.silent:
-                print ("Failed, trying again (%s)..." % i)
-
+            logger.debug("Failed, trying again (%s)..." % i)
             sleep(5)
             GetRadonValue()
 
