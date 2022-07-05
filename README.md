@@ -8,7 +8,7 @@ EtoTen v0.4 - 07/05/2022
 - Added auto-scan ability 
 - Change the read function to call the handler directly, instead of interacting with the UUIDs
 
-Note: if specifying an -a MAC address, you now also have to specify a device type (either 0 for original RD200 or 1 for RD200 v2)
+Note: if specifying an (-a) MAC address, you now also have to specify a device type (-t) (either 0 for original RD200 or 1 for RD200 v2)
 
 
 # Pre-req install steps:
@@ -28,11 +28,10 @@ This project provides a tool which allows users collect current radon data from 
 
 
 # Hardware Requirements
-- FTLabs RadonEye RD200 
-- Raspberry Pi w/Bluetooth LE (Low Energy) support
+- FTLabs RadonEye RD200 v1 or v2
+- Raspberry Pi w/Bluetooth LE (Low Energy) support (RPi 3B/4/etc...)
 
-
-# Software Requeriments
+# Software Requirements
 - Python 3.7
 - bluepy Python library
 - paho-mqtt Python library
