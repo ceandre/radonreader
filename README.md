@@ -17,6 +17,19 @@ python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
 python3 radon_reader.py -v
 
 
+Pre-req install steps:
+
+sudo apt install libglib2.0-dev
+
+pip3 install bluepy
+
+pip3 install paho-mqtt
+
+setcap cap_net_raw+e /home/pi/.local/lib/python3.7/site-packages/bluepy/bluepy-helper
+
+setcap cap_net_admin+eip /home/pi/.local/lib/python3.7/site-packages/bluepy/bluepy-helper
+
+
 ------------
 
 This project provides a tool which allows users collect current radon data from FTLab Radon Eye RD200 (Bluetooth only version).
