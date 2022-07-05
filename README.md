@@ -6,6 +6,7 @@ EtoTen v0.4 - 07/05/2022
 - Changed compatability to Python3 
 - Added support for new RD200 models made in 2022
 - Added auto-scan ability 
+- Change the read function to call the handler directly, instead of interacting with the UUIDs
 
 Note: if specifying an -a MAC address, you now also have to specify a device type (either 0 for original RD200 or 1 for RD200 v2)
 
