@@ -12,6 +12,7 @@ Note: if specifying an -a MAC address, you now also have to specify a device typ
 Example usage:
 
 python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
+
 python3 radon_reader.py -v
 
 
