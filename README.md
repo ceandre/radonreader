@@ -29,7 +29,7 @@ sudo setcap cap_net_admin+eip /home/pi/.local/lib/python3.7/site-packages/bluepy
  
 - Now make the app send automatic updates to HA every 3 minutes
  <pre><code>crontab -e</pre></code> 
- <pre><code>*/3 * * * * python3 /home/pi/radonreader/radon_reader.py -v -a 94:3c:c6:dd:42:ce -t 1 -ms localhost -mu radonuser -mw radon123  -mw radon123  -ma -m #update radon reading via MQTT every 3 minutes</pre></code> 
+ <pre><code>*/3 * * * * /usr/bin/python3 /home/pi/radonreader/radon_reader.py -v -a 94:3c:c6:dd:42:ce -t 1 -ms localhost -mu radonuser -mw radon123  -mw radon123  -ma -m #update radon reading via MQTT every 3 minutes</pre></code> 
 
 - Add this to configuration.yaml:
 <pre><code>
