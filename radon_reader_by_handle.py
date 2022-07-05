@@ -77,8 +77,16 @@ def radon_device_reader(rdDeviceAddress,rdDeviceType):
 		nConnect(p, 5, rdDeviceAddress);
 		p.withDelegate(ReadDelegate())
 		#send -- "char-write-cmd 0x002a 50\r" ./temp_expect.sh  (https://community.home-assistant.io/t/radoneye-ble-interface/94962/115)
-		intHandle = int.from_bytes(b'\x00\x2a', "big")
+
+		if rdDeviceType == 1:
+			#handle: 0x002a, uuid: 00001524-0000-1000-8000-00805f9b34fb 
+			intHandle = int.from_bytes(b'\x00\x2a', "big")
+		elif rdDeviceType == 0:  #old
+			#handle: 0x000b, uuid: 00001524-1212-efde-1523-785feabcd123
+			intHandle = int.from_bytes(b'\x00\x0b', "big") 
+
 		bGETValues = b"\x50"
+
 		logger.debug('Sending payload (byte): %s To handle (int): %s', bGETValues, intHandle)
 		p.writeCharacteristic(intHandle, bGETValues, True);
 		while p.waitForNotifications(1):
