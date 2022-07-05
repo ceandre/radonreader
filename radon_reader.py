@@ -17,7 +17,7 @@ from random import randint
 
 from radon_reader_by_handle import radon_device_finder, radon_device_reader, radonDataRAW, ScanDelegate, ReadDelegate, nConnect
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
