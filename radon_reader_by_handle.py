@@ -1,16 +1,19 @@
+#!/usr/bin/python3
 import bluepy.btle as btle
 from bluepy.btle import Scanner, DefaultDelegate, BTLEException
 import struct
 import logging
 import sys
+from time import sleep
+
 
 logger = logging.getLogger()
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
-logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
+
 
 class ScanDelegate(DefaultDelegate):
 	def __init__(self):
@@ -19,7 +22,7 @@ class ScanDelegate(DefaultDelegate):
 	def handleDiscovery(self, dev, isNewDev, isNewData):
 		pass
 
-def radeon_device_finder():
+def radon_device_finder():
 	logger.debug('Scanning for devices')
 	scanner = Scanner().withDelegate(ScanDelegate())
 	try:
@@ -43,45 +46,68 @@ def radeon_device_finder():
 		scanner.stop()
 		logger.error('Recieved scan exception ' + e.message)
 
-
-
-class ReadDelegate(btle.DefaultDelegate):
-	def handleNotification(self, cHandle, data):
-		if rdDeviceType == 1: #new RD200 sends back short int (2-bytes) with Bq/m^3
-			RadonValueBQ = struct.unpack('<H',data[2:4])[0]
-			logger.debug('Radon Value Raw: {}'.format(data))
-			RadonValuePCi = ( RadonValueBQ / 37 )
-
-		elif rdDeviceType == 0:  #old RD200 sends back pCi/L as a 4-byte float
-			RadonValuePCi = struct.unpack('<f',data[2:6])[0]
-			logger.debug('Radon Value Raw: {}'.format(data))
-			RadonValueBQ = ( RadonValuePCi * 37 )
-
-		logger.info('Radon Value Bq/m^3: {}'.format(RadonValueBQ))
-		logger.info('Radon Value pCi/L: {}'.format(RadonValuePCi))
-
 #raw data for .05 pCi/L:
 ##50 0a 02 00 05 00 00 00 00 00 00 00
 ##02 05 00 00 05 00 00 00 00'
 ##b'P\n\x02\x00\x05\x00\x00\x00\x00\x00\x00\x00'
 
+radonDataRAW = b"\x00"
+class ReadDelegate(btle.DefaultDelegate):
+	def handleNotification(self, cHandle, data):
+		global radonDataRAW
+		logger.debug('Radon Value Raw: {}'.format(data))
+		radonDataRAW=data
 
-rdDeviceAddress, rdDeviceType = radeon_device_finder() #auto find the device
+def nConnect(per, num_retries, address):
+        try_num = 1
+        while (try_num < num_retries):
+            try:
+                per._connect(address)
+                return True
+            except BTLEException:
+                logger.debug("Re-trying connections attempts: {}'".format(try_num))
+                try_num += 1
+                sleep(1)
+        # if we fell through the while loop, it failed to connect
+        return False 
 
-if rdDeviceType >= 0:
-	p = btle.Peripheral(rdDeviceAddress)
-	p.withDelegate(ReadDelegate())
+def radon_device_reader(rdDeviceAddress,rdDeviceType):
+	if rdDeviceType >= 0:
+		p = btle.Peripheral()
+		nConnect(p, 5, rdDeviceAddress);
+		p.withDelegate(ReadDelegate())
+		#send -- "char-write-cmd 0x002a 50\r" ./temp_expect.sh  (https://community.home-assistant.io/t/radoneye-ble-interface/94962/115)
+		intHandle = int.from_bytes(b'\x00\x2a', "big")
+		bGETValues = b"\x50"
+		logger.debug('Sending payload (byte): %s To handle (int): %s', bGETValues, intHandle)
+		p.writeCharacteristic(intHandle, bGETValues, True);
+		while p.waitForNotifications(1):
+        		pass
+		p.disconnect()
 
-	#send -- "char-write-cmd 0x002a 50\r"
-	intHandle = int.from_bytes(b'\x00\x2a', "big")
-	bGETValues = b"\x50"
-	logger.debug('Sending payload (byte): %s To handle (int): %s', bGETValues, intHandle)
-	p.writeCharacteristic(intHandle, bGETValues, True);
+		if rdDeviceType == 1: #new RD200 sends back short int (2-bytes) with Bq/m^3
+			RadonValueBQ = struct.unpack('<H',radonDataRAW[2:4])[0]
+			RadonValuePCi = ( RadonValueBQ / 37 )
+		elif rdDeviceType == 0:  #old RD200 sends back pCi/L as a 4-byte float
+			RadonValuePCi = struct.unpack('<f',radonDataRAW[2:6])[0]
+			RadonValueBQ = ( RadonValuePCi * 37 )
+		logger.info('Radon Value Bq/m^3: {}'.format(RadonValueBQ))
+		logger.info('Radon Value pCi/L: {}'.format(RadonValuePCi))
 
-	while p.waitForNotifications(1):
-        	pass
-	p.disconnect()
+		return RadonValueBQ, RadonValuePCi
 
-elif rdDeviceType == -1:
-	logger.error("Device not found, no data to return.")
+	elif rdDeviceType == -1:
+		logger.error("Device not found, no data to return.")
+		return  -1,-1
+
+
+#testing w/o radon_reader.py
+
+if ('radon_reader_by_handle' not in sys.modules): #if I was not imported
+
+	logger.addHandler(handler) # add handler for standard out
+
+	mRdDeviceAddress, mRdDeviceType = radon_device_finder() #auto find the device
+	radon_device_reader (mRdDeviceAddress , mRdDeviceType) #get data from the device
+
 

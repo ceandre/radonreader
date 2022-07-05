@@ -3,10 +3,9 @@
 """ radon_reader.py: RadonEye RD200 (Bluetooth/BLE) Reader """
 
 __progname__    = "RadonEye RD200 (Bluetooth/BLE) Reader"
-__version__     = "0.3.8"
-__author__      = "Carlos Andre"
-__email__       = "candrecn at hotmail dot com"
-__date__        = "2019-10-20"
+__version__     = "0.4.0"
+__author__      = "etoten"
+__date__        = "2021-07-05"
 
 import argparse, struct, time, re, json
 import paho.mqtt.client as mqtt
@@ -16,16 +15,17 @@ from bluepy import btle
 from time import sleep
 from random import randint
 
-logger = logging.getLogger()
+from radon_reader_by_handle import radon_device_finder, radon_device_reader, radonDataRAW, ScanDelegate, ReadDelegate, nConnect
 
+logger = logging.getLogger(__name__)
 handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,description=__progname__)
-parser.add_argument('-a',dest='address',help='Bluetooth Address (AA:BB:CC:DD:EE:FF format)',required=True)
+parser.add_argument('-a',dest='address',help='Bluetooth Address (AA:BB:CC:DD:EE:FF format)',required=False)
+parser.add_argument('-t',dest='type',help='rd200 type 0 for <2022 1 for =>2022 models',required=False)
 parser.add_argument('-b','--becquerel',action='store_true',help='Display radon value in Becquerel (Bq/m^3) unit', required=False)
 parser.add_argument('-v','--verbose',action='store_true',help='Verbose mode', required=False)
 parser.add_argument('-s','--silent',action='store_true',help='Output only radon value (without unit and timestamp)', required=False)
@@ -37,9 +37,7 @@ parser.add_argument('-mw',dest='mqtt_pw',help='MQTT server password', required=F
 parser.add_argument('-ma',dest='mqtt_ha',action='store_true',help='Switch to Home Assistant MQTT output (Default: EmonCMS)', required=False)
 args = parser.parse_args()
 
-args.address = args.address.upper()
-
-if not re.match("^([0-9A-F]{2}:){5}[0-9A-F]{2}$", args.address) or (args.mqtt and (args.mqtt_srv == None or args.mqtt_user == None or args.mqtt_pw == None)):
+if (args.mqtt and (args.mqtt_srv == None or args.mqtt_user == None or args.mqtt_pw == None)):
     parser.print_help()
     quit()
 
@@ -49,70 +47,40 @@ def GetRadonValue():
     else:
        logger.setLevel(logging.ERROR)
 
-    try:
-       DevBT = btle.Peripheral()
-       DevBT.connect(args.address, 'public')
-       DevBT.setMTU(507)
-       services = DevBT.getServices()
-       for service in list(services):
-          logger.debug(service)
+    if args.address != None and args.type != None:
+      args.address = args.address.upper()
+      if re.match("^([0-9A-F]{2}:){5}[0-9A-F]{2}$", args.address):
+         mRdDeviceAddress =  args.address
+         mRdDeviceType = int(args.type)
+      else:
+         logger.info("-a (mac address) and -t (device type 0|1 not specified, reverting to auto-scan)")
+         mRdDeviceAddress, mRdDeviceType = radon_device_finder() #auto find the device
+    else:
+         logger.info("-a (mac address) and -t (device type 0|1 not specified, reverting to auto-scan)")
+         mRdDeviceAddress, mRdDeviceType = radon_device_finder() #auto find the device
 
-       #send -- "char-write-cmd 0x002a 50\r"
-
-
-       RadonEye = btle.UUID("00001523-0000-1000-8000-00805f9b34fb")
-       RadonEyeService = DevBT.getServiceByUUID(RadonEye)
-       logger.debug('Reading: {}'.format(RadonEye))
-       logger.debug('RadonEyeService from UUID: {}'.format(RadonEyeService))
-
-       # Write 0x50 to 00001524-1212-efde-1523-785feabcd123
-       uuidWrite  = btle.UUID("00001524-0000-1000-8000-00805f9b34fb")
-       logger.debug('Writing UUID: {}'.format(uuidWrite))
-       RadonEyeWrite = RadonEyeService.getCharacteristics(uuidWrite)[0]
-       logger.debug('Service Characteristics: {}'.format(RadonEyeWrite))
-      # bGETValues = bytes("\x50", "ascii")
-#       bGETValues = bytes([0x50])
-       bGETValues = b"\x50"
-       logger.debug('Writing Bytes: {}'.format(bGETValues))
-       RadonEyeWrite.write(bGETValues,True)
-       #RadonEyeWrite.write(bytes("P",'ascii'),True)
-       while DevBT.waitForNotifications(1): pass
-     #   while self.delegate.data_length < min_bytes: pass
-      #  received = self.delegate.data
-      #  if unpack_string: received = struct.unpack(unpack_string,received)
-       # Read from 3rd to 6th byte of 00001525-1212-efde-1523-785feabcd123
-       uuidRead  = btle.UUID("00001525-0000-1000-8000-00805f9b34fb")
-       logger.debug('Reading: {}'.format(uuidRead))
-       RadonEyeValue = RadonEyeService.getCharacteristics(uuidRead)[0]
-       RadonValue = RadonEyeValue.read()
-       logger.debug('Radon Value: {}'.format(RadonValue))
-       RadonValue = struct.unpack('<H',RadonValue[2:4])[0]
-
-       DevBT.disconnect()
-
-    except btle.BTLEException as e:
-          logger.error('BluePy failed: {}'.format(e))
-          return False
+    mRadonValueBQ, mRadonValuePCi = radon_device_reader (mRdDeviceAddress , mRdDeviceType) #get data from the device
 
 
     # Raise exception (will try get Radon value from RadonEye again) if received a very
     # high radon value or lower than 0. 
     # Maybe a bug on RD200 or Python BLE Lib?!
-    if ( RadonValue > 1000 ) or ( RadonValue < 0 ):
+    if ( mRadonValueBQ > 1000 ) or ( mRadonValueBQ < 0 ):
         raise Exception("Very strange radon value. Debugging needed.")
 
     if args.becquerel:
         Unit="Bq/m^3"
-#        RadonValue = ( RadonValue * 37 )
+        RadonValue = mRadonValueBQ
     else:
         Unit="pCi/L"
-        RadonValue = ( RadonValue / 37 )
+        RadonValue = mRadonValuePCi
+
 
     if args.silent:
         print ("%0.2f" % (RadonValue))
-    else: 
-        print ("%s - %s - Radon Value: %0.2f %s" % (time.strftime("%Y-%m-%d [%H:%M:%S]"),args.address,RadonValue,Unit))
-   
+    else:
+        print ("%s - %s - Radon Value: %0.2f %s" % (time.strftime("%Y-%m-%d [%H:%M:%S]"),mRdDeviceAddress,RadonValue,Unit))
+
     if args.mqtt:
         if args.verbose and not args.silent:
             print ("Sending to MQTT...")
@@ -147,7 +115,7 @@ try:
 except Exception as e:
     if args.verbose and not args.silent:
         print (e)
-    
+
     for i in range(1,4):
         try:
             logger.debug("Failed, trying again (%s)..." % i)

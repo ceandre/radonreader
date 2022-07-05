@@ -1,4 +1,14 @@
-# RadonReader
+# RadonReader 2022 RD200 v2 (=>2022)
+
+
+EtoTen 07/05/2022
+- Forked Project
+- Changed compatability to Python3 
+- Added support for new RD200 models made in 2022
+- Added auto-scan ability 
+
+
+------------
 
 This project provides a tool which allows users collect current radon data from FTLab Radon Eye RD200 (Bluetooth only version).
 
@@ -10,7 +20,7 @@ This project provides a tool which allows users collect current radon data from 
 
 
 # Software Requeriments
-- Python 2.7.x 
+- Python 3.7
 - bluepy Python library
 
 
@@ -27,6 +37,7 @@ RadonEye RD200 (Bluetooth/BLE) Reader
 optional arguments:
   -h, --help       show this help message and exit
   -a ADDRESS       Bluetooth Address (AA:BB:CC:DD:EE:FF format)
+  -t TYPE          0 for original RD200, 1 for RD200 v2 (=>2022)
   -b, --becquerel  Display radon value in Becquerel (Bq/m^3) unit
   -v, --verbose    Verbose mode
   -s, --silent     Only output radon value (without unit and timestamp)
