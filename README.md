@@ -10,14 +10,9 @@ EtoTen v0.4 - 07/05/2022
 
 Note: if specifying an -a MAC address, you now also have to specify a device type (either 0 for original RD200 or 1 for RD200 v2)
 
-#Example usage:
 
-python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
+# Pre-req install steps:
 
-python3 radon_reader.py -v
-
-
-#Pre-req install steps:
 <pre><code>
 sudo apt install libglib2.0-dev
 pip3 install bluepy
@@ -32,16 +27,15 @@ sudo setcap cap_net_admin+eip /home/pi/.local/lib/python3.7/site-packages/bluepy
 This project provides a tool which allows users collect current radon data from FTLab Radon Eye RD200 (Bluetooth only version).
 
 
-# Hardware Requeriments
+# Hardware Requirements
 - FTLabs RadonEye RD200 
-- Raspberry Pi 
-- Bluetooth LE (Low Energy) support
+- Raspberry Pi w/Bluetooth LE (Low Energy) support
 
 
 # Software Requeriments
 - Python 3.7
 - bluepy Python library
-
+- paho-mqtt Python library
 
 # History
 - 0.4 - Forked
@@ -49,7 +43,7 @@ This project provides a tool which allows users collect current radon data from 
 
 
 # Usage
-<pre><code>usage: radon_reader.py [-h] -a ADDRESS [-b] [-v] [-s] [-m] [-ms MQTT_SRV]
+<pre><code>usage: radon_reader.py [-h] [-a] ADDRESS [-t] DEVICE_TYPE [-b] [-v] [-s] [-m] [-ms MQTT_SRV]
                        [-mp MQTT_PORT] [-mu MQTT_USER] [-mw MQTT_PW] [-ma]
 
 RadonEye RD200 (Bluetooth/BLE) Reader
@@ -67,3 +61,9 @@ optional arguments:
   -mu MQTT_USER    MQTT server username
   -mw MQTT_PW      MQTT server password
   -ma              Enable Home Assistant MQTT output (Default: EmonCMS)</code></pre>
+
+# Example usage:
+<pre><code>
+python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
+python3 radon_reader.py -v
+</pre></code>
