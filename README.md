@@ -1,11 +1,18 @@
 # RadonReader 2022 RD200 v2 (=>2022)
 
 
-EtoTen 07/05/2022
+EtoTen v0.4 - 07/05/2022
 - Forked Project
 - Changed compatability to Python3 
 - Added support for new RD200 models made in 2022
 - Added auto-scan ability 
+
+Note: if specifying an -a MAC address, you now also have to specify a device type (either 0 for original RD200 or 1 for RD200 v2)
+
+Example usage:
+
+python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
+python3 radon_reader.py -v
 
 
 ------------
