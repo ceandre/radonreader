@@ -52,9 +52,13 @@ def GetRadonValue():
     try:
        DevBT = btle.Peripheral()
        DevBT.connect(args.address, 'public')
+       DevBT.setMTU(507)
        services = DevBT.getServices()
        for service in list(services):
           logger.debug(service)
+
+       #send -- "char-write-cmd 0x002a 50\r"
+
 
        RadonEye = btle.UUID("00001523-0000-1000-8000-00805f9b34fb")
        RadonEyeService = DevBT.getServiceByUUID(RadonEye)
@@ -66,7 +70,9 @@ def GetRadonValue():
        logger.debug('Writing UUID: {}'.format(uuidWrite))
        RadonEyeWrite = RadonEyeService.getCharacteristics(uuidWrite)[0]
        logger.debug('Service Characteristics: {}'.format(RadonEyeWrite))
-       bGETValues = bytes("\x50", "ascii")
+      # bGETValues = bytes("\x50", "ascii")
+#       bGETValues = bytes([0x50])
+       bGETValues = b"\x50"
        logger.debug('Writing Bytes: {}'.format(bGETValues))
        RadonEyeWrite.write(bGETValues,True)
        #RadonEyeWrite.write(bytes("P",'ascii'),True)
