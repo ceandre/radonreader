@@ -21,6 +21,7 @@ sudo setcap cap_net_admin+eip /home/pi/.local/lib/python3.7/site-packages/bluepy
 </pre></code>
 
 
+
 ------------
 
 This project provides a tool which allows users collect current radon data from FTLab Radon Eye RD200 (Bluetooth only version).
@@ -61,6 +62,7 @@ optional arguments:
   -ma              Enable Home Assistant MQTT output (Default: EmonCMS)</code></pre>
 
 # Example usage:
-<pre><code>python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
-python3 radon_reader.py -v
+<pre><code>python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v #verbose output/ specific device MAC
+python3 radon_reader.py -v #verbose output, auto scan
+python3 radon_reader.py -v -a 94:3c:c6:dd:42:ce -t 1 -ms localhost -mu radonuser -mw radon123  -ma -m #verbose output, specific device MAC, mqtt to home assistant
 </pre></code>
