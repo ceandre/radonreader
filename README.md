@@ -10,24 +10,21 @@ EtoTen v0.4 - 07/05/2022
 
 Note: if specifying an -a MAC address, you now also have to specify a device type (either 0 for original RD200 or 1 for RD200 v2)
 
-Example usage:
+#Example usage:
 
 python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
 
 python3 radon_reader.py -v
 
 
-Pre-req install steps:
-
+#Pre-req install steps:
+<pre><code>
 sudo apt install libglib2.0-dev
-
 pip3 install bluepy
-
 pip3 install paho-mqtt
-
-setcap cap_net_raw+e /home/pi/.local/lib/python3.7/site-packages/bluepy/bluepy-helper
-
-setcap cap_net_admin+eip /home/pi/.local/lib/python3.7/site-packages/bluepy/bluepy-helper
+sudo setcap cap_net_raw+e /home/pi/.local/lib/python3.7/site-packages/bluepy/bluepy-helper
+sudo setcap cap_net_admin+eip /home/pi/.local/lib/python3.7/site-packages/bluepy/bluepy-helper
+</pre></code>
 
 
 ------------
@@ -47,6 +44,7 @@ This project provides a tool which allows users collect current radon data from 
 
 
 # History
+- 0.4 - Forked
 - 0.3 - Added MQTT support
 
 
