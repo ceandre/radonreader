@@ -13,8 +13,7 @@ Note: if specifying an (-a) MAC address, you now also have to specify a device t
 
 # Pre-req install steps:
 
-<pre><code>
-sudo apt install libglib2.0-dev
+<pre><code>sudo apt install libglib2.0-dev
 pip3 install bluepy
 pip3 install paho-mqtt
 sudo setcap cap_net_raw+e /home/pi/.local/lib/python3.7/site-packages/bluepy/bluepy-helper
@@ -62,7 +61,6 @@ optional arguments:
   -ma              Enable Home Assistant MQTT output (Default: EmonCMS)</code></pre>
 
 # Example usage:
-<pre><code>
-python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
+<pre><code>python3 radon_reader.py -a 94:3c:c6:dd:42:ce -t 1 -v
 python3 radon_reader.py -v
 </pre></code>
