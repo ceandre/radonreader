@@ -37,6 +37,7 @@ mqtt:
   sensor:
     - state_topic: "environment/RADONEYE/#"
       name: 'Radon Level'
+      unique_id: 'radon_level'
       unit_of_measurement: 'pCi/L'
       value_template: "{{ value_json.radonvalue }}"
 </pre></code>
