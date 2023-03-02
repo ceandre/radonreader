@@ -42,8 +42,8 @@ mqtt:
       value_template: "{{ value_json.radonvalue }}"
 </pre></code>
 
-- Now you cam add a sensor card to your HA view
-- 
+- Now you can add a sensor card to your HA view
+
 # Hardware Requirements
 - FTLabs RadonEye RD200 v1 or v2
 - Raspberry Pi w/Bluetooth LE (Low Energy) support (RPi 3B/4/etc...)
